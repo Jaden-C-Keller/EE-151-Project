@@ -1,6 +1,6 @@
 int motor[4];//array for PWM ports controlling motors
-int encoder[4] = {24, 25};
-int counter = 0;
+int encPort = 24;
+float counter = 0.0;
 int lastValue;
 int newValue;
 boolean done = true;
@@ -9,17 +9,17 @@ void setup() {
   for(int i = 1; i<=4; i++){
     Serial.begin(9600);
     motor[i] = i+3; //sets motor control values to port numbers
-    pinMode(encoder[i], INPUT);//sets encoder ports to input
+    pinMode(encPort, INPUT);//sets encoder ports to input
     pinMode(motor[i], OUTPUT);//sets motor ports to output
-    lastValue = digitalRead(encoder[1]);
+    lastValue = digitalRead(encPort);
   }
 }
 
 void loop() {
   if(done){
-    linear(0.5);
-    Encoder(10000);
-    linear(0.0);
+    linear(0.75);
+    Encoder(cm(20.0));
+    pause();
     done = false;
   }
 }
@@ -68,18 +68,14 @@ void leftMotor(float speed){//control left motor
   }  
 }
 
-void Encoder(int distance){
- while(counter<distance){
-   newValue = digitalRead(encoder[1]);
+void Encoder(float distance){
+ while(abs(counter)<distance){
+   newValue = digitalRead(encPort);
      if(newValue != lastValue){
-       /*if(digitalRead(encoder[2]) != newValue){
          counter++;
-       }
-       else{*/
-         counter++;
-       //}
      }
    lastValue = newValue;
+ Serial.println(counter);
  }
  counter = 0;
 }
@@ -87,6 +83,19 @@ void Encoder(int distance){
 
 int percent(float speed){//convert percentage to analog units
   return speed * 255.0;
+}
+
+float cm(float distance){//convert raw counter to centimeters
+  return distance*2.35;
+}
+
+float degree(float distance){//conver raw counter to degrees
+  return 0;
+}
+
+void pause(){
+  rightMotor(0);
+  leftMotor(0);
 }
 
 
